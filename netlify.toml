@@ -1,0 +1,10 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[functions]
+  node_bundler = "esbuild"
+
+# Allow the import endpoint enough time to fetch four feeds (Netlify functions default to 10s on free tier; background-safe path below)
+[functions."___netlify-server-handler"]
+  included_files = ["drizzle/**"]
