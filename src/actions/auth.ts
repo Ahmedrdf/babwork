@@ -25,6 +25,7 @@ export async function register(_: FormState, form: FormData): Promise<FormState>
   const password = String(form.get('password') || '');
   if (!emailSchema.safeParse(email).success) return { error: t.errors.invalidEmail };
   if (password.length < 8 || password.length > 200) return { error: t.errors.shortPassword };
+  if (password !== String(form.get('confirmPassword') || '')) return { error: t.errors.passwordMismatch };
   const [exists] = await db.select({ id: users.id }).from(users).where(eq(users.email, email));
   if (exists) return { error: t.errors.emailExists };
 
@@ -57,6 +58,9 @@ export async function logout() {
 
 export async function requestPasswordReset(_: FormState, form: FormData): Promise<FormState> {
   const t = await getT();
+  // Check before looking up the account so this response cannot reveal whether it exists.
+  // The development mail logger does not deliver email and must not report success here.
+  if (!env.mailEnabled) return { error: t.errors.resetUnavailable };
   if (!(await rateLimit(`reset:${await clientIp()}`, 5, 3600))) return { error: t.errors.tooManyRequests };
   const email = String(form.get('email') || '').trim().toLowerCase();
   const [user] = await db.select({ id: users.id }).from(users).where(eq(users.email, email));

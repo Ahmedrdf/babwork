@@ -1,7 +1,14 @@
 import 'server-only';
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { eq } from 'drizzle-orm';
+import { db, cvFiles } from '@/db';
 import { env } from './env';
 
+/**
+ * CVs go to Cloudflare R2 when it's configured, otherwise into the database.
+ * The database option needs no extra account and is plenty for a site that's starting;
+ * hosts like Netlify have a read-only disk, so files can't be kept there.
+ */
 function client() {
   return new S3Client({
     region: 'auto',
@@ -10,36 +17,34 @@ function client() {
   });
 }
 
-/** Store a CV privately in R2. Returns the object key. */
+/** Store a CV privately. Returns its key. */
 export async function putCv(userId: number, file: File) {
-  const ext = (file.name.split('.').pop() || 'pdf').toLowerCase();
+  const ext = (file.name.split('.').pop() || 'pdf').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 5) || 'pdf';
   const key = `cv/${userId}/${Date.now()}.${ext}`;
   const body = Buffer.from(await file.arrayBuffer());
-  if (!env.storageEnabled) {
-    // Local development fallback: keep CVs on disk under .uploads/
-    const fs = await import('fs/promises');
-    await fs.mkdir('.uploads/' + key.split('/').slice(0, -1).join('/'), { recursive: true });
-    await fs.writeFile('.uploads/' + key, body);
-    return key;
+  const contentType = file.type || 'application/octet-stream';
+  if (env.storageEnabled) {
+    await client().send(new PutObjectCommand({ Bucket: env.R2_BUCKET, Key: key, Body: body, ContentType: contentType }));
+  } else {
+    await db.insert(cvFiles).values({ key, data: body, contentType, size: body.length });
   }
-  await client().send(new PutObjectCommand({ Bucket: env.R2_BUCKET, Key: key, Body: body, ContentType: file.type || 'application/octet-stream' }));
   return key;
 }
 
 export async function getCv(key: string): Promise<Buffer> {
-  if (!env.storageEnabled) {
-    const fs = await import('fs/promises');
-    return fs.readFile('.uploads/' + key);
+  if (env.storageEnabled) {
+    const res = await client().send(new GetObjectCommand({ Bucket: env.R2_BUCKET, Key: key }));
+    return Buffer.from(await res.Body!.transformToByteArray());
   }
-  const res = await client().send(new GetObjectCommand({ Bucket: env.R2_BUCKET, Key: key }));
-  return Buffer.from(await res.Body!.transformToByteArray());
+  const [row] = await db.select({ data: cvFiles.data }).from(cvFiles).where(eq(cvFiles.key, key));
+  if (!row) throw new Error('CV not found');
+  return Buffer.from(row.data);
 }
 
 export async function deleteCv(key: string) {
-  if (!env.storageEnabled) {
-    const fs = await import('fs/promises');
-    await fs.rm('.uploads/' + key, { force: true });
+  if (env.storageEnabled) {
+    await client().send(new DeleteObjectCommand({ Bucket: env.R2_BUCKET, Key: key }));
     return;
   }
-  await client().send(new DeleteObjectCommand({ Bucket: env.R2_BUCKET, Key: key }));
+  await db.delete(cvFiles).where(eq(cvFiles.key, key));
 }

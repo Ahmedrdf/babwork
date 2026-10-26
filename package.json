@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/prepare-ai-assets.cjs",
+    "prebuild": "node scripts/prepare-ai-assets.cjs",
+    "postinstall": "node scripts/prepare-ai-assets.cjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -13,7 +16,9 @@
     "seed": "tsx scripts/seed.ts",
     "ingest": "tsx scripts/ingest.ts",
     "typecheck": "tsc --noEmit",
-    "recategorize": "tsx scripts/recategorize.ts"
+    "recategorize": "tsx scripts/recategorize.ts",
+    "test:premium": "node --require tsx/cjs --test tests/premium.test.cjs tests/konnect.test.cjs",
+    "test": "node --require tsx/cjs --test tests/*.test.cjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1145.0",
@@ -21,12 +26,15 @@
     "@fontsource/el-messiri": "^5.3.0",
     "@fontsource/figtree": "^5.3.0",
     "@fontsource/noto-sans-arabic": "^5.3.0",
+    "@huggingface/transformers": "^3.8.1",
     "@stripe/react-stripe-js": "^7.0.0",
     "@stripe/stripe-js": "^10.0.0",
     "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.3",
     "lucide-react": "^1.52.0",
+    "mammoth": "^1.13.0",
     "next": "16.3.8",
+    "pdfjs-dist": "^6.4.299",
     "pg": "^8.23.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
@@ -52,5 +60,10 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "overrides": {
+    "@huggingface/transformers": {
+      "sharp": "^0.35.5"
+    }
   }
 }

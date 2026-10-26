@@ -50,3 +50,13 @@ export function regionFromTimeZone(tz: string): RegionKey | null {
   if (tz.startsWith('Asia/') || tz.startsWith('Australia/') || tz.startsWith('Pacific/')) return 'apac';
   return null;
 }
+
+// Country (ISO code) → region, used first because it's more reliable than the time zone
+const COUNTRY_REGION: Record<string, RegionKey> = {};
+const assign = (k: RegionKey, codes: string) => codes.split(' ').forEach((c) => { COUNTRY_REGION[c] = k; });
+assign('europe', 'AD AL AM AT AZ BA BE BG BY CH CY CZ DE DK EE ES FI FO FR GB GE GG GI GR HR HU IE IM IS IT JE LI LT LU LV MC MD ME MK MT NL NO PL PT RO RS RU SE SI SK SM UA VA XK');
+assign('americas', 'AG AI AR AW BB BL BM BO BQ BR BS BZ CA CL CO CR CU CW DM DO EC FK GD GF GL GP GT GY HN HT JM KN KY LC MF MQ MS MX NI PA PE PM PR PY SR SV SX TC TT US UY VC VE VG VI');
+assign('mea', 'AE AO BF BH BI BJ BW CD CF CG CI CM CV DJ DZ EG EH ER ET GA GH GM GN GQ GW IL IQ IR JO KE KM KW LB LR LS LY MA MG ML MR MU MW MZ NA NE NG OM PS QA RE RW SA SC SD SH SL SN SO SS ST SY SZ TD TG TN TR TZ UG YE YT ZA ZM ZW');
+assign('apac', 'AF AS AU BD BN BT CK CN FJ FM GU HK ID IN JP KG KH KI KP KR KZ LA LK MH MM MN MO MP MV MY NC NP NR NU NZ PF PG PH PK PW SB SG TH TJ TL TM TO TV TW UZ VN VU WS');
+
+export const regionFromCountry = (country: string | null): RegionKey | null => (country ? COUNTRY_REGION[country.toUpperCase()] ?? null : null);

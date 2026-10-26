@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { saveProfile, deleteAccount } from '@/actions/account';
 import type { FormState } from '@/actions/auth';
 import { Flash } from '@/components/Flash';
@@ -10,7 +10,9 @@ import { useT } from '@/i18n/client';
 type P = { fullName: string; headline: string; location: string; phone: string; linkedinUrl: string; portfolioUrl: string; summary: string; coverNote: string; cvKey: string | null; cvOriginalName: string | null };
 
 export function ProfileForm({ profile, next, user }: { profile: P; next?: string; user: { email: string; isPro: boolean; hasStripe: boolean; billing: boolean } }) {
-  const p = useT().profile;
+  const t = useT();
+  const p = t.profile;
+  const [fileError, setFileError] = useState<string | null>(null);
   const [state, action] = useActionState<FormState, FormData>(saveProfile, undefined);
   return (
     <>
@@ -26,7 +28,11 @@ export function ProfileForm({ profile, next, user }: { profile: P; next?: string
         <label className="full">{p.summary} <textarea name="summary" rows={4} dir="auto" defaultValue={profile.summary} /></label>
         <label className="full">{p.coverNote} <textarea name="coverNote" rows={6} dir="auto" defaultValue={profile.coverNote} placeholder={p.coverPh} /></label>
         <label className="full">{p.cv}
-          <input type="file" name="cv" accept=".pdf,.doc,.docx" />
+          <input type="file" name="cv" accept=".pdf,.doc,.docx" onChange={(e) => {
+            const f = e.currentTarget.files?.[0];
+            if (f && f.size > 4 * 1024 * 1024) { setFileError(t.errors.cvSize); e.currentTarget.value = ''; } else setFileError(null);
+          }} />
+          {fileError && <span className="err" role="alert">{fileError}</span>}
           {profile.cvKey && <small>{p.cvCurrent}<a href="/api/profile/cv">{profile.cvOriginalName}</a>{p.cvReplace}</small>}
         </label>
         <div className="full"><SubmitButton pendingText={p.saving}>{p.save}</SubmitButton></div>
@@ -35,6 +41,7 @@ export function ProfileForm({ profile, next, user }: { profile: P; next?: string
       <section className="account-box">
         <h2>{p.account}</h2>
         <p><span dir="ltr">{user.email}</span>{user.billing ? <> — {user.isPro ? p.subscriber : p.freePlan}. <Link href="/subscribe">{user.isPro ? p.manage : p.plans}</Link></> : null}</p>
+        {!user.billing && user.hasStripe && <form method="post" action="/api/billing/portal"><button className="linkish">{p.manage}</button></form>}
         <form action={deleteAccount} onSubmit={(e) => { if (!confirm(p.deleteConfirm)) e.preventDefault(); }}>
           <button className="btn danger-btn" type="submit">{p.delete}</button>
           {user.billing && user.isPro && user.hasStripe && <p className="hint">{p.cancelFirst}</p>}

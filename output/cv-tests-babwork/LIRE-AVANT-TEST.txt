@@ -1,0 +1,20 @@
+CV FICTIFS POUR TESTER BABWORK
+
+Tous les noms, adresses et parcours de ces CV sont inventés.
+Le pack contient trois profils, chacun en PDF, DOCX et TXT.
+
+1. Français : développement web React et TypeScript.
+2. Anglais : support client et service client SaaS.
+3. Arabe : analyse de données SQL, Python et Power BI.
+
+Mode d’emploi
+Décompressez le ZIP puis connectez-vous à Babwork.
+Ouvrez la page Recommandé pour vous et choisissez un fichier PDF, DOCX ou TXT.
+Cliquez sur Trouver des offres adaptées.
+Le premier lancement peut prendre quelques minutes pour charger le modèle.
+
+Pour comparer les profils, sélectionnez Toutes les régions et testez un CV à la fois.
+Comparez ensuite les titres des postes proposés et les compétences communes.
+Les offres affichées dépendent des annonces actuellement actives ; un profil peut avoir peu de correspondances.
+Les trois formats d’un même profil contiennent le même CV et devraient donner des résultats proches.
+Les coordonnées de démonstration utilisent le domaine réservé example.com.

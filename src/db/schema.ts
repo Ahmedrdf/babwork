@@ -1,5 +1,5 @@
 import {
-  pgTable, serial, text, timestamp, boolean, integer, jsonb, uniqueIndex, index, primaryKey, pgEnum,
+  customType, pgTable, serial, text, timestamp, boolean, integer, jsonb, uniqueIndex, index, primaryKey, pgEnum,
 } from 'drizzle-orm/pg-core';
 import { relations, sql } from 'drizzle-orm';
 
@@ -17,6 +17,7 @@ export const users = pgTable('users', {
   stripeCustomerId: text('stripe_customer_id').unique(),
   stripeSubscriptionId: text('stripe_subscription_id'),
   subscriptionEndsAt: timestamp('subscription_ends_at', { withTimezone: true }),
+  premiumSource: text('premium_source'),
   isAdmin: boolean('is_admin').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
@@ -71,6 +72,7 @@ export const jobs = pgTable('jobs', {
   publishedAt: timestamp('published_at', { withTimezone: true }).notNull(),
   fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow(),
   active: boolean('active').notNull().default(true),
+  moderationBlocked: boolean('moderation_blocked').notNull().default(false),
 }, (t) => [
   uniqueIndex('jobs_source_idx').on(t.source, t.sourceId),
   index('jobs_fingerprint_idx').on(t.fingerprint),
@@ -101,6 +103,21 @@ export const jobViews = pgTable('job_views', {
   viewedAt: timestamp('viewed_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [primaryKey({ columns: [t.userId, t.jobId] }), index('job_views_job_idx').on(t.jobId)]);
 
+// Raw bytes column (Postgres bytea), returned as a Buffer whichever driver is used
+const bytea = customType<{ data: Buffer; driverData: Buffer | Uint8Array }>({
+  dataType() { return 'bytea'; },
+  fromDriver(v) { return Buffer.from(v as Uint8Array); },
+});
+
+// CV files, used when Cloudflare R2 isn't configured: keeps the site working with only a database
+export const cvFiles = pgTable('cv_files', {
+  key: text('key').primaryKey(),
+  data: bytea('data').notNull(),
+  contentType: text('content_type').notNull().default('application/octet-stream'),
+  size: integer('size').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const ingestRuns = pgTable('ingest_runs', {
   id: serial('id').primaryKey(),
   source: text('source').notNull(),
@@ -120,12 +137,52 @@ export const stripeEvents = pgTable('stripe_events', {
   processedAt: timestamp('processed_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
+/** Each verified Konnect payment grants exactly one month once. Amounts are millimes. */
+export const konnectPayments = pgTable('konnect_payments', {
+  id: text('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'set null' }),
+  paymentRef: text('payment_ref').unique(),
+  checkoutUrl: text('checkout_url'),
+  amount: integer('amount').notNull(),
+  currency: text('currency').notNull().default('TND'),
+  mode: text('mode').notNull(),
+  status: text('status').notNull().default('pending'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  paidAt: timestamp('paid_at', { withTimezone: true }),
+}, table => [index('konnect_payments_user_idx').on(table.userId),
+  uniqueIndex('konnect_payments_pending_user_mode_idx').on(table.userId, table.mode).where(sql`${table.status} = 'pending'`)]);
+
 // DB-backed rate limiting (works across serverless instances)
 export const rateLimits = pgTable('rate_limits', {
   key: text('key').primaryKey(),       // e.g. login:ip:1.2.3.4
   count: integer('count').notNull().default(0),
   resetAt: timestamp('reset_at', { withTimezone: true }).notNull(),
 });
+
+// One successful, local CV comparison per account. Failed/cancelled downloads do not consume it.
+export const matchingTrials = pgTable('matching_trials', {
+  userId: integer('user_id').primaryKey().references(() => users.id, { onDelete: 'cascade' }),
+  permit: text('permit').notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
+});
+
+export const jobReports = pgTable('job_reports', {
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  jobId: integer('job_id').notNull().references(() => jobs.id, { onDelete: 'cascade' }),
+  reason: text('reason').notNull(),
+  note: text('note').notNull().default(''),
+  status: text('status').notNull().default('open'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, t => [primaryKey({ columns: [t.userId, t.jobId] })]);
+
+export const recommendationFeedback = pgTable('recommendation_feedback', {
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  jobId: integer('job_id').notNull().references(() => jobs.id, { onDelete: 'cascade' }),
+  helpful: boolean('helpful').notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, t => [primaryKey({ columns: [t.userId, t.jobId] })]);
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   profile: one(profiles, { fields: [users.id], references: [profiles.userId] }),

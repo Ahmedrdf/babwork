@@ -10,10 +10,10 @@ export const LANGUAGE_NAMES: Record<Locale, string> = { en: 'English', fr: 'Fran
 // The 22 member states of the Arab League
 const ARAB_COUNTRIES = new Set(['DZ', 'BH', 'KM', 'DJ', 'EG', 'IQ', 'JO', 'KW', 'LB', 'LY', 'MR', 'MA', 'OM', 'PS', 'QA', 'SA', 'SO', 'SD', 'SY', 'TN', 'AE', 'YE']);
 
-/** France → French, Arab countries → Arabic, everywhere else → English. */
+/** France and Tunisia → French, other Arab countries → Arabic, elsewhere → English. */
 export function localeForCountry(country: string): Locale {
   const c = country.toUpperCase();
-  if (c === 'FR') return 'fr';
+  if (c === 'FR' || c === 'TN') return 'fr';
   if (ARAB_COUNTRIES.has(c)) return 'ar';
   return 'en';
 }

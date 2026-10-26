@@ -3,12 +3,13 @@ import { cache } from 'react';
 import { and, desc, eq, sql, isNotNull, count, ne, inArray, type SQL } from 'drizzle-orm';
 import { db, jobs, jobViews, type Job } from '@/db';
 import { isRegion, sqlPattern, SQL_ANYWHERE, type RegionKey } from './regions';
+import { TUNISIA_LOCATION_PATTERN } from './tunisia';
 
 export const PAGE_SIZE = 24;
 export const JOB_TYPES = ['part_time', 'full_time', 'contract', 'freelance', 'internship'] as const;
 export type JobType = (typeof JOB_TYPES)[number];
 
-export type JobFilters = { q?: string; type?: string; category?: string; region?: string; direct?: boolean; salary?: boolean; hours?: boolean; page?: number };
+export type JobFilters = { q?: string; type?: string; category?: string; region?: string; country?: string; direct?: boolean; salary?: boolean; hours?: boolean; page?: number };
 
 export { REGIONS, REGION_KEYS, isRegion, type RegionKey } from './regions';
 
@@ -33,6 +34,7 @@ export async function listJobs(f: JobFilters) {
   if (f.type && (JOB_TYPES as readonly string[]).includes(f.type)) where.push(eq(jobs.jobType, f.type as JobType));
   if (f.category) where.push(eq(jobs.category, f.category));
   if (isRegion(f.region)) where.push(regionCondition(f.region));
+  if (f.country === 'TN') where.push(sql`${jobs.location} ~* ${TUNISIA_LOCATION_PATTERN}`);
   if (f.direct) where.push(isNotNull(jobs.applyEmail));
   if (f.salary) where.push(sql`${jobs.salary} <> ''`);
   if (f.hours) where.push(sql`${jobs.hoursPerWeek} <> ''`);

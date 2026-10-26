@@ -1,18 +1,25 @@
-# Runs the job import every 3 hours by calling the app's protected endpoint.
-# Free on GitHub Actions. Set APP_URL and CRON_SECRET in the repo's Settings → Secrets.
+# Imports jobs every 3 hours, directly in GitHub Actions (free). The import talks to the database itself,
+# so it isn't cut short by the host's 10-second limit on serverless functions.
+# One secret to set: Settings → Secrets and variables → Actions → DATABASE_URL (the Neon pooled string).
 name: Ingest jobs
 on:
   schedule:
     - cron: '17 */3 * * *'
   workflow_dispatch: {}
+concurrency:
+  group: ingest
+  cancel-in-progress: false
 jobs:
   ingest:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - name: Call ingest endpoint
-        run: |
-          code=$(curl -s -o /tmp/out.json -w '%{http_code}' -X POST \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            --max-time 290 "${{ secrets.APP_URL }}/api/cron/ingest")
-          cat /tmp/out.json
-          test "$code" = "200"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run ingest
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

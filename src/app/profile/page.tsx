@@ -2,9 +2,12 @@ import { redirect } from 'next/navigation';
 import { eq } from 'drizzle-orm';
 import { db, profiles } from '@/db';
 import { getCurrentUser } from '@/lib/auth';
-import { env } from '@/lib/env';
 import { getT } from '@/i18n/server';
 import { ProfileForm } from './ProfileForm';
+import { PremiumNudge } from '@/components/PremiumDiscovery';
+import { getLocale } from '@/i18n/server';
+import { getBillingMarket } from '@/lib/billing-market';
+import { env } from '@/lib/env';
 export async function generateMetadata() { return { title: (await getT()).meta.profile }; }
 
 export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ next?: string; welcome?: string; missing?: string }> }) {
@@ -18,7 +21,8 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
       {sp.welcome && <p className="done">{t.profile.welcome}</p>}
       {sp.missing && <p className="warn">{t.profile.missing}</p>}
       <p className="quiet">{t.profile.intro}</p>
-      <ProfileForm profile={profile} next={sp.next} user={{ email: user.email, isPro: user.isPro, hasStripe: !!user.stripeCustomerId, billing: env.paymentsEnabled }} />
+      <ProfileForm profile={profile} next={sp.next} user={{ email: user.email, isPro: user.isPro, hasStripe: !!user.stripeCustomerId, billing: env.pricingVisible }} />
+      {profile?.cvKey && <PremiumNudge locale={await getLocale()} isPro={user.isPro} context="profile" market={await getBillingMarket()} />}
     </section>
   );
 }

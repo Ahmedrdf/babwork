@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "konnect_payments_pending_user_mode_idx" ON "konnect_payments" USING btree ("user_id","mode") WHERE "konnect_payments"."status" = 'pending';

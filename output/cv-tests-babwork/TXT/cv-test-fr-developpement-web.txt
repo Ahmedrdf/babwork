@@ -1,0 +1,30 @@
+CV Développement web
+
+Camille Martin Test
+
+Développeuse frontend React et TypeScript
+
+Paris, France | Télétravail en Europe ou à l’international | camille.test@example.com
+
+Profil entièrement fictif créé pour tester les recommandations de Babwork. Toutes les expériences et organisations ci-dessous sont inventées.
+
+Profil
+Développeuse frontend avec quatre ans d’expérience fictive dans la création d’applications web accessibles et responsive. Je recherche un poste en développement React ou TypeScript, en télétravail, dans une équipe produit. Je construis des interfaces, connecte des API et améliore la qualité du code.
+
+Compétences
+React, TypeScript, JavaScript, HTML, CSS, Next.js, Node.js, Git, REST API, Jest, Playwright, tests automatisés, accessibilité web et conception responsive.
+
+Expérience professionnelle
+2023 à 2026 | Développeuse frontend | Atelier Démo
+Création d’un tableau de bord SaaS en React et TypeScript. Intégration d’API REST, développement de composants réutilisables et tests avec Jest. Collaboration avec les designers et revue de code en équipe distante.
+2022 à 2023 | Développeuse web junior | Studio Exemple
+Développement de sites HTML et CSS, correction de bugs JavaScript et adaptation mobile. Utilisation de Git pour travailler en équipe et de Playwright pour les tests de navigation.
+
+Projet
+Application fictive de gestion de tâches avec React, TypeScript et Next.js. Filtres de recherche, formulaires accessibles, affichage responsive et tests automatisés.
+
+Formation
+2022 | Licence informatique fictive | Institut Démonstration
+
+Langues et disponibilité
+Français courant et anglais professionnel. Disponible pour un emploi à temps plein ou une mission freelance à distance.

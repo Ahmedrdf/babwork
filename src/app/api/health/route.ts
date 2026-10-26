@@ -7,6 +7,7 @@ export async function GET() {
     await db.execute(sql`select 1`);
     return NextResponse.json({ ok: true, db: 'up', time: new Date().toISOString() });
   } catch (err) {
-    return NextResponse.json({ ok: false, db: 'down', error: err instanceof Error ? err.message : String(err) }, { status: 503 });
+    console.error('[health] Database check failed', err);
+    return NextResponse.json({ ok: false, db: 'down' }, { status: 503, headers: { 'Cache-Control': 'no-store' } });
   }
 }

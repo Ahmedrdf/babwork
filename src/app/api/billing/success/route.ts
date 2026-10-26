@@ -1,26 +1,23 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { eq } from 'drizzle-orm';
-import { db, users } from '@/db';
 import { getCurrentUser } from '@/lib/auth';
-import { stripe, periodEnd } from '@/lib/stripe';
+import { stripe } from '@/lib/stripe';
+import { syncSubscription } from '@/lib/subscriptions';
 import { env } from '@/lib/env';
 
-// Stripe.js returns the browser here after confirmPayment. Activate immediately;
-// the webhook remains the source of truth afterwards.
 export async function GET(req: NextRequest) {
   const user = await getCurrentUser();
-  if (!user) return NextResponse.redirect(new URL('/login', env.APP_URL));
-  const subId = req.nextUrl.searchParams.get('subscription');
-  const next = req.nextUrl.searchParams.get('next') || '/jobs';
-  if (stripe && subId) {
+  if (!user) return NextResponse.redirect(new URL('/login?next=/recommendations', env.APP_URL));
+  const id = req.nextUrl.searchParams.get('session_id');
+  if (stripe && id) {
     try {
-      const sub = await stripe.subscriptions.retrieve(subId);
-      if (sub.customer === user.stripeCustomerId && ['active', 'trialing'].includes(sub.status)) {
-        await db.update(users).set({ plan: 'pro', stripeSubscriptionId: sub.id, subscriptionEndsAt: periodEnd(sub) }).where(eq(users.id, user.id));
+      const session = await stripe.checkout.sessions.retrieve(id);
+      const customer = typeof session.customer === 'string' ? session.customer : session.customer?.id;
+      const subscription = typeof session.subscription === 'string' ? session.subscription : session.subscription?.id;
+      if (session.mode === 'subscription' && session.payment_status === 'paid' && customer === user.stripeCustomerId
+        && session.client_reference_id === String(user.id) && subscription && await syncSubscription(subscription)) {
+        return NextResponse.redirect(new URL('/recommendations', env.APP_URL));
       }
-    } catch (err) {
-      console.error('[billing] success activation failed', err);
-    }
+    } catch (error) { console.error('[billing] checkout confirmation failed', error); }
   }
-  return NextResponse.redirect(new URL(next.startsWith('/') ? next : '/jobs', env.APP_URL));
+  return NextResponse.redirect(new URL('/subscribe?pending=1', env.APP_URL));
 }

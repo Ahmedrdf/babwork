@@ -11,7 +11,9 @@ function authorized(req: NextRequest) {
   return given.length === expected.length && timingSafeEqual(Buffer.from(given), Buffer.from(expected));
 }
 
-// Called by the GitHub Actions schedule (see .github/workflows/ingest.yml)
+// Manual trigger only (curl -X POST -H "Authorization: Bearer $CRON_SECRET" $APP_URL/api/cron/ingest).
+// The scheduled import runs in GitHub Actions (.github/workflows/ingest.yml): on Netlify's free tier
+// functions stop after 10 seconds, which isn't enough for four feeds.
 export async function POST(req: NextRequest) {
   if (!authorized(req)) return new NextResponse('Unauthorized', { status: 401 });
   const result = await ingestAll();

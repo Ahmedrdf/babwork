@@ -1,7 +1,34 @@
-# Changelog
+    # Changelog
 
 Each version lists only the files changed in that version. "new" = file created, "deleted" = file to remove.
 Phase 1 (the first Next.js version) is the starting point: every file of the project.
+
+## v13 — import runs on GitHub Actions, database housekeeping, legal notice
+- `.github/workflows/ingest.yml` — rewritten: checks out the code, Node 22, `npm ci`, `npm run ingest`; only secret needed is `DATABASE_URL` (replaces `APP_URL` + `CRON_SECRET` in the repo secrets — Netlify's free functions stop after 10 s)
+- `src/ingest/run.ts` — batched import: one read of a source's existing jobs, one fingerprint lookup for cross-source dedup, inserts and updates in chunks of 100 (`INSERT … ON CONFLICT DO UPDATE`); same dedup rules, same 14-day expiry
+- new: `src/ingest/cleanup.ts` — every import deletes expired sessions, tokens and `rate_limits` rows
+- `scripts/ingest.ts` — exits non-zero when every feed failed, so a broken run shows red in Actions
+- `src/app/api/cron/ingest/route.ts` — kept for a manual run (comment only)
+- new: `src/app/legal/page.tsx` — legal notice in English, French and Arabic
+- new: `src/lib/legal.ts` — publisher name and address **to complete** (marked `[… — TO COMPLETE]`), host details, contact address
+- `src/lib/env.ts`, `.env.example` — new `CONTACT_EMAIL` variable (add it on Netlify too)
+- `src/app/privacy/page.tsx` — shows the contact address from `CONTACT_EMAIL`
+- `src/app/layout.tsx` — "Legal notice" link in the footer
+- `src/i18n/messages.ts` — legal notice texts, footer link, privacy contact line, in the three languages
+- `src/app/globals.css` — layout of the publisher details on the legal page
+- `netlify.toml` — comment only
+- `README.md` — section 2.6 (GitHub Actions now needs `DATABASE_URL`), project layout
+
+## v12 — CV upload works online, wider pages, region from the visitor's country
+- `src/lib/storage.ts` — CVs are stored in the database when Cloudflare R2 isn't set up (the host's disk is read-only)
+- `src/db/schema.ts` — new table `cv_files`
+- new: `drizzle/0002_cv_files.sql`, `drizzle/meta/0002_snapshot.json`; changed: `drizzle/meta/_journal.json` (run `npm run db:migrate`, also on Neon)
+- `src/actions/account.ts` — a failed CV upload shows a message instead of doing nothing; limit lowered to 4 MB
+- `src/app/profile/ProfileForm.tsx` — warns right away when the chosen file is too big
+- `src/lib/visitor.ts`, `src/lib/regions.ts`, `src/i18n/server.ts` — region taken from the visitor's country first, time zone only as a fallback
+- `src/app/page.tsx`, `src/i18n/messages.ts` — clock says "where you are" instead of a city; new and updated messages
+- `src/app/globals.css` — pages up to 1320 px wide on large screens
+- `README.md` — Cloudflare R2 is now optional
 
 ## v11 — the site is called Babwork
 - `src/app/layout.tsx` — the logo now reads "Babwork"

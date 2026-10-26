@@ -1,8 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import type Stripe from 'stripe';
 import { eq } from 'drizzle-orm';
-import { db, users, stripeEvents } from '@/db';
-import { stripe, periodEnd } from '@/lib/stripe';
+import { db, stripeEvents } from '@/db';
+import { stripe } from '@/lib/stripe';
+import { syncSubscription } from '@/lib/subscriptions';
 import { env } from '@/lib/env';
 
 export async function POST(req: NextRequest) {
@@ -21,18 +22,25 @@ export async function POST(req: NextRequest) {
 
   try {
     switch (event.type) {
-      case 'invoice.paid': {
+      case 'invoice.paid':
+      case 'invoice.payment_failed': {
         const inv = event.data.object;
         const ref = inv.parent?.subscription_details?.subscription;
         const subId = typeof ref === 'string' ? ref : ref?.id ?? null;
-        if (subId) await syncSubscription(await stripe.subscriptions.retrieve(subId));
+        if (subId) await syncSubscription(subId);
         break;
       }
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted':
-        await syncSubscription(event.data.object);
+        await syncSubscription(event.data.object.id);
         break;
+      case 'checkout.session.completed':
+      case 'checkout.session.async_payment_succeeded': {
+        const ref = event.data.object.subscription;
+        if (ref) await syncSubscription(typeof ref === 'string' ? ref : ref.id);
+        break;
+      }
     }
   } catch (err) {
     console.error('[billing] webhook handler failed', err);
@@ -43,12 +51,3 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ received: true });
 }
 
-async function syncSubscription(sub: Stripe.Subscription) {
-  const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer.id;
-  const active = ['active', 'trialing', 'past_due'].includes(sub.status);
-  await db.update(users).set({
-    plan: active ? 'pro' : 'free',
-    stripeSubscriptionId: sub.id,
-    subscriptionEndsAt: active ? periodEnd(sub) : null,
-  }).where(eq(users.stripeCustomerId, customerId));
-}

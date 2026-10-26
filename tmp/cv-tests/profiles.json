@@ -1,0 +1,107 @@
+[
+  {
+    "stem": "cv-test-fr-developpement-web",
+    "lang": "fr-FR",
+    "title": "CV Développement web",
+    "name": "Camille Martin Test",
+    "role": "Développeuse frontend React et TypeScript",
+    "notice": "Profil entièrement fictif créé pour tester les recommandations de Babwork. Toutes les expériences et organisations ci-dessous sont inventées.",
+    "contact": "Paris, France | Télétravail en Europe ou à l’international | camille.test@example.com",
+    "sections": [
+      [
+        "Profil",
+        "Développeuse frontend avec quatre ans d’expérience fictive dans la création d’applications web accessibles et responsive. Je recherche un poste en développement React ou TypeScript, en télétravail, dans une équipe produit. Je construis des interfaces, connecte des API et améliore la qualité du code."
+      ],
+      [
+        "Compétences",
+        "React, TypeScript, JavaScript, HTML, CSS, Next.js, Node.js, Git, REST API, Jest, Playwright, tests automatisés, accessibilité web et conception responsive."
+      ],
+      [
+        "Expérience professionnelle",
+        "2023 à 2026 | Développeuse frontend | Atelier Démo\nCréation d’un tableau de bord SaaS en React et TypeScript. Intégration d’API REST, développement de composants réutilisables et tests avec Jest. Collaboration avec les designers et revue de code en équipe distante.\n2022 à 2023 | Développeuse web junior | Studio Exemple\nDéveloppement de sites HTML et CSS, correction de bugs JavaScript et adaptation mobile. Utilisation de Git pour travailler en équipe et de Playwright pour les tests de navigation."
+      ],
+      [
+        "Projet",
+        "Application fictive de gestion de tâches avec React, TypeScript et Next.js. Filtres de recherche, formulaires accessibles, affichage responsive et tests automatisés."
+      ],
+      [
+        "Formation",
+        "2022 | Licence informatique fictive | Institut Démonstration"
+      ],
+      [
+        "Langues et disponibilité",
+        "Français courant et anglais professionnel. Disponible pour un emploi à temps plein ou une mission freelance à distance."
+      ]
+    ]
+  },
+  {
+    "stem": "cv-test-en-customer-support",
+    "lang": "en-GB",
+    "title": "CV Customer support",
+    "name": "Alex Taylor Test",
+    "role": "Customer Support Specialist for SaaS products",
+    "notice": "Entirely fictional profile created to test Babwork recommendations. Every position and organisation below is invented.",
+    "contact": "Remote in Europe | Open to worldwide remote teams | alex.test@example.com",
+    "sections": [
+      [
+        "Profile",
+        "Customer support specialist with three years of fictional experience helping users of SaaS products. I am looking for a remote customer service, technical support or customer success role. I communicate clearly, investigate problems and follow customer issues through to resolution."
+      ],
+      [
+        "Skills",
+        "Customer support, customer service, customer success, Zendesk, Intercom, Freshdesk, CRM, email support, live chat, troubleshooting, ticket management, knowledge base writing and customer onboarding."
+      ],
+      [
+        "Professional experience",
+        "2024 to 2026 | Customer Support Specialist | Cloud Demo\nAnswered email and live chat questions about a fictional SaaS platform. Investigated login and billing issues, reproduced reported bugs and escalated technical cases to engineers. Maintained help centre articles and supported new customer onboarding.\n2023 to 2024 | Customer Service Assistant | Example Services\nManaged customer enquiries, organised support tickets and documented common solutions. Used CRM records to track conversations and collaborated with a remote support team."
+      ],
+      [
+        "Example project",
+        "Built a fictional help centre with clear onboarding guides and troubleshooting instructions. Organised ticket categories in Zendesk and prepared customer service response templates."
+      ],
+      [
+        "Education",
+        "2023 | Fictional diploma in business communication | Demo Institute"
+      ],
+      [
+        "Languages and availability",
+        "Fluent English and professional French. Available for full-time or part-time remote work. Comfortable collaborating across European time zones."
+      ]
+    ]
+  },
+  {
+    "stem": "cv-test-ar-analyse-donnees",
+    "lang": "ar-TN",
+    "title": "سيرة ذاتية في تحليل البيانات",
+    "name": "نور مثال",
+    "role": "محللة بيانات وتقارير أعمال",
+    "notice": "هذا ملف خيالي بالكامل لاختبار توصيات الوظائف في Babwork. جميع الخبرات والمؤسسات المذكورة أدناه افتراضية.",
+    "contact": "تونس | متاحة للعمل عن بعد مع فرق دولية | nour.test@example.com",
+    "sections": [
+      [
+        "نبذة مهنية",
+        "محللة بيانات بخبرة افتراضية لمدة ثلاث سنوات في تنظيف البيانات وإعداد التقارير ولوحات المعلومات. أبحث عن وظيفة في تحليل البيانات أو ذكاء الأعمال أو إعداد التقارير عن بعد. أستخدم البيانات لفهم أداء المنتجات والمبيعات وتقديم نتائج واضحة للفرق."
+      ],
+      [
+        "المهارات",
+        "SQL و Python و pandas و Excel و Power BI و Tableau. تحليل البيانات وتنظيفها، إعداد التقارير، تصور البيانات، لوحات المعلومات، مؤشرات الأداء، قواعد البيانات والإحصاء الأساسي."
+      ],
+      [
+        "الخبرة المهنية",
+        "من 2024 إلى 2026 | محللة بيانات | مؤسسة بيانات تجريبية\nتحليل بيانات المبيعات والعملاء باستخدام SQL و Python. تنظيف الجداول باستخدام pandas وإعداد لوحات معلومات في Power BI. كتابة تقارير دورية تشرح مؤشرات الأداء ومشاركة النتائج مع فرق المنتج والأعمال.\nمن 2023 إلى 2024 | مساعدة تحليل بيانات | استوديو المثال\nتنظيم ملفات Excel والتحقق من جودة البيانات. إعداد رسوم بيانية وتقارير أسبوعية ومقارنة النتائج بين الفترات. التعاون مع فريق يعمل عن بعد لتوثيق مصادر البيانات."
+      ],
+      [
+        "مشروع تجريبي",
+        "لوحة معلومات افتراضية لمتابعة مبيعات متجر. استخدام SQL لاستخراج البيانات و Python لتنظيفها و Power BI لعرض المؤشرات والاتجاهات. توثيق خطوات التحليل وتفسير النتائج."
+      ],
+      [
+        "التكوين",
+        "2023 | شهادة افتراضية في نظم المعلومات وتحليل البيانات | معهد العرض التجريبي"
+      ],
+      [
+        "اللغات والتوفر",
+        "العربية بطلاقة والفرنسية بمستوى مهني والإنجليزية بمستوى متوسط. متاحة للعمل عن بعد بدوام كامل أو في مشاريع تحليل بيانات مستقلة."
+      ]
+    ]
+  }
+]

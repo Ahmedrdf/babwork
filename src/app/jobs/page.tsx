@@ -8,8 +8,11 @@ import { getVisitor } from '@/lib/visitor';
 import { getLocale } from '@/i18n/server';
 import { messages } from '@/i18n/messages';
 import { INTL } from '@/i18n/config';
+import { PremiumNudge } from '@/components/PremiumDiscovery';
+import { getBillingMarket } from '@/lib/billing-market';
+import { improvements } from '@/i18n/improvements';
 
-type Search = { q?: string; type?: string; category?: string; region?: string; direct?: string; salary?: string; hours?: string; view?: string; page?: string };
+type Search = { q?: string; type?: string; category?: string; region?: string; country?: string; direct?: string; salary?: string; hours?: string; view?: string; page?: string };
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<Search> }): Promise<Metadata> {
   const [sp, locale] = await Promise.all([searchParams, getLocale()]);
@@ -29,15 +32,18 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
   const sp = await searchParams;
   const f = { q: sp.q || '', type: sp.type || '', category: sp.category || '', region: isRegion(sp.region) ? sp.region : '', direct: sp.direct === '1', salary: sp.salary === '1', hours: sp.hours === '1', page: Number(sp.page) || 1 };
   const compact = sp.view === 'list';
-  const [{ jobs, total, page, pages }, categories, user, locale] = await Promise.all([listJobs(f), topCategories(12), getCurrentUser(), getLocale()]);
+  const country = sp.country === 'TN' ? 'TN' : '';
+  const filters = { ...f, country };
+  const [{ jobs, total, page, pages }, categories, user, locale] = await Promise.all([listJobs(filters), topCategories(12), getCurrentUser(), getLocale()]);
   const [seen, visitor] = await Promise.all([viewedIds(user?.id, jobs.map((j) => j.id)), getVisitor()]);
   const t = messages[locale];
-  const hasFilters = !!(f.q || f.type || f.category || f.region || f.direct || f.salary || f.hours);
+  const hasFilters = !!(f.q || f.type || f.category || f.region || f.direct || f.salary || f.hours || country);
   const catName = (c: string) => t.categories[c] ?? c;
 
-  const qs = (over: Partial<typeof f> & { view?: string }) => {
+  const qs = (over: Partial<typeof f> & { view?: string; country?: string }) => {
     const p = new URLSearchParams();
-    const m = { ...f, view: sp.view, ...over };
+    const m = { ...f, country, view: sp.view, ...over };
+    if (m.country) p.set('country', m.country);
     if (m.q) p.set('q', m.q); if (m.type) p.set('type', m.type); if (m.category) p.set('category', m.category); if (m.region) p.set('region', m.region);
     if (m.direct) p.set('direct', '1'); if (m.salary) p.set('salary', '1'); if (m.hours) p.set('hours', '1');
     if (m.view) p.set('view', m.view);
@@ -72,6 +78,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
 
           <fieldset>
             <legend>{t.jobs.onlyShow}</legend>
+            <label className="check"><input type="checkbox" name="country" value="TN" defaultChecked={country === 'TN'} /> {improvements[locale].tunisia}</label>
             <label className="check"><input type="checkbox" name="direct" value="1" defaultChecked={f.direct} /> {t.jobs.direct}</label>
             <label className="check"><input type="checkbox" name="salary" value="1" defaultChecked={f.salary} /> {t.jobs.salary}</label>
             <label className="check"><input type="checkbox" name="hours" value="1" defaultChecked={f.hours} /> {t.jobs.hours}</label>
@@ -79,7 +86,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
 
           {f.category && <input type="hidden" name="category" value={f.category} />}
           <button type="submit" className="btn">{t.jobs.apply}</button>
-          {hasFilters && <Link className="clear" href={qs({ q: '', type: '', category: '', region: '', direct: false, salary: false, hours: false, page: 1 })}>{t.jobs.clear}</Link>}
+          {hasFilters && <Link className="clear" href={qs({ q: '', type: '', category: '', region: '', country: '', direct: false, salary: false, hours: false, page: 1 })}>{t.jobs.clear}</Link>}
         </form>
 
         {categories.length > 0 && (
@@ -95,6 +102,8 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
       </aside>
 
       <div className="results">
+        {country && <p className="matching-notice">{improvements[locale].tunisiaHint}</p>}
+        <PremiumNudge locale={locale} isPro={user?.isPro} context="jobs" market={await getBillingMarket()} />
         <div className="results-bar">
           <p className="count">
             <strong>{total.toLocaleString(INTL[locale])}</strong> {t.jobs.countWord(total)}

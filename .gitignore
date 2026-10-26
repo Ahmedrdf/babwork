@@ -46,3 +46,9 @@ node_modules/
 .next/
 .netlify/
 .pglite/
+.pglite-*/
+.pglite*.lock
+/public/ai-runtime/
+/.cache/
+
+/.local-backups/

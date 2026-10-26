@@ -3,7 +3,7 @@ import 'dotenv/config';
 import { readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { sql } from 'drizzle-orm';
-import { db } from '../src/db';
+import { db, closeDb } from '../src/db';
 
 async function main() {
   await db.execute(sql`CREATE TABLE IF NOT EXISTS _migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())`);
@@ -12,11 +12,12 @@ async function main() {
   for (const f of files) {
     if (done.has(f)) continue;
     const statements = readFileSync(join(process.cwd(), 'drizzle', f), 'utf8').split('--> statement-breakpoint').map((s) => s.trim()).filter(Boolean);
-    for (const st of statements) await db.execute(sql.raw(st));
-    await db.execute(sql`INSERT INTO _migrations (name) VALUES (${f})`);
+    await db.transaction(async tx => {
+      for (const st of statements) await tx.execute(sql.raw(st));
+      await tx.execute(sql`INSERT INTO _migrations (name) VALUES (${f})`);
+    });
     console.log('applied', f);
   }
   console.log(done.size === files.length ? 'database already up to date' : 'migrations complete');
-  process.exit(0);
 }
-main().catch((e) => { console.error(e); process.exit(1); });
+main().catch((e) => { console.error(e); process.exitCode = 1; }).finally(closeDb);

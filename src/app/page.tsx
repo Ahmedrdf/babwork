@@ -3,14 +3,20 @@ import { homeStats, listJobs, featuredCompanies, topCategories, viewedIds, regio
 import { REGIONS, REGION_KEYS } from '@/lib/regions';
 import { JobCard } from '@/components/JobCard';
 import { CategoryIcon } from '@/components/CategoryIcon';
-import { Door } from '@/components/Door';
+import { PremiumPreview, PremiumNudge, premiumAction } from '@/components/PremiumDiscovery';
+import { ArrowRight, Globe2, ShieldCheck, Sparkles } from 'lucide-react';
+import { getBillingMarket } from '@/lib/billing-market';
+import { getDiscoveryMessages } from '@/i18n/billing';
 import { LogoMark } from '@/components/LogoMark';
 import { getCurrentUser } from '@/lib/auth';
 import { getVisitor } from '@/lib/visitor';
 import { getLocale } from '@/i18n/server';
 import { messages } from '@/i18n/messages';
 import { INTL } from '@/i18n/config';
-import { clock, hourDiff, cityFromTz } from '@/lib/time';
+import { clock, hourDiff } from '@/lib/time';
+import { env } from '@/lib/env';
+import { improvements } from '@/i18n/improvements';
+import { launchMessages } from '@/i18n/launch';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +25,9 @@ export default async function Home() {
     homeStats(), listJobs({ page: 1 }), featuredCompanies(10), topCategories(8), getCurrentUser(), regionCounts(), getVisitor(), getLocale(),
   ]);
   const t = messages[locale];
+  const market = await getBillingMarket();
+  const d = getDiscoveryMessages(locale, market, env.freeLaunchEnabled);
+  const premium = premiumAction(locale, user?.isPro);
   const num = (n: number) => n.toLocaleString(INTL[locale]);
   const recent = latest.jobs.slice(0, 6);
   const seen = await viewedIds(user?.id, recent.map((j) => j.id));
@@ -27,23 +36,32 @@ export default async function Home() {
 
   return (
     <>
-      <section className="hero">
+      <section className="hero discovery-hero">
         <div className="hero-text">
-          <p className="eyebrow">{t.home.eyebrow}</p>
-          <h1>{t.home.title}</h1>
-          <p className="lede">{t.home.lede}</p>
+          <p className="eyebrow"><Sparkles size={15} aria-hidden="true" />{d.eyebrow}</p>
+          <h1>{d.headline}<span>{d.headlineAccent}</span></h1>
+          <p className="lede">{d.intro}</p>
+          <div className="hero-actions"><Link className="btn btn-premium" href={premium.href}>{premium.label}<ArrowRight size={18} className="action-arrow" aria-hidden="true" /></Link>
+            <Link className="hero-secondary" href="/jobs">{d.freeBrowse}<ArrowRight size={16} className="action-arrow" aria-hidden="true" /></Link></div>
+          <p className="hero-price-note">{env.freeLaunchEnabled ? launchMessages[locale].info : env.pricingVisible ? d.priceNote : improvements[locale].freeTrialShort}</p>
           <form className="search" action="/jobs" method="get">
             <input type="search" name="q" placeholder={t.home.searchPlaceholder} aria-label={t.jobs.searchAria} />
             <button type="submit" className="btn">{t.home.searchButton}</button>
           </form>
+          <ul className="hero-trust"><li><ShieldCheck size={16} aria-hidden="true" />{d.private}</li><li><Globe2 size={16} aria-hidden="true" />{d.multilingual}</li></ul>
         </div>
-        <Door className="door" />
+        <PremiumPreview locale={locale} />
       </section>
+
+      <dl className="discovery-stats"><div><dt>{d.liveJobs}</dt><dd>{num(stats.total)}</dd></div>
+        <div><dt>{d.regions}</dt><dd>{num(REGION_KEYS.length)}</dd></div>
+        <div><dt>{d.languagesLabel}</dt><dd>{num(3)}</dd></div>
+        <div><dt>{d.freeBrowse}</dt><dd>0 {market === 'TN' ? 'DT' : '€'}</dd></div></dl>
 
       <section className="clockbar" aria-label={t.home.zonesAria}>
         <p className="clock-now">
           {visitor.tz
-            ? <>{t.home.clockBefore} <strong>{clock(visitor.tz, now)}</strong> {t.home.clockAfter(cityFromTz(visitor.tz))}</>
+            ? <>{t.home.clockBefore} <strong>{clock(visitor.tz, now)}</strong> {t.home.clockAfter()}</>
             : t.home.clockNone}
         </p>
         <div className="zones">
@@ -77,6 +95,8 @@ export default async function Home() {
         {recent.length === 0 ? <p className="empty">{t.home.empty}</p>
           : <ul className="cards">{recent.map((j) => <JobCard key={j.id} j={j} locale={locale} seen={seen.has(j.id)} openRegion={visitor.region} />)}</ul>}
       </section>
+
+      <PremiumNudge locale={locale} isPro={user?.isPro} context="home" market={market} />
 
       {categories.length > 0 && (
         <section>

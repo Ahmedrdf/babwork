@@ -9,8 +9,9 @@ import { sendMail } from '@/lib/mail';
 import { rateLimit } from '@/lib/rate-limit';
 import type { FormState } from './auth';
 import { getT } from '@/i18n/server';
+import { stripe } from '@/lib/stripe';
 
-const MAX_CV = 5 * 1024 * 1024;
+const MAX_CV = 4 * 1024 * 1024; // hosts cap request bodies around 6 MB once encoded
 const CV_TYPES = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
 
 export async function saveProfile(_: FormState, form: FormData): Promise<FormState> {
@@ -26,7 +27,13 @@ export async function saveProfile(_: FormState, form: FormData): Promise<FormSta
   if (file instanceof File && file.size > 0) {
     if (file.size > MAX_CV) return { error: t.errors.cvSize };
     if (!CV_TYPES.includes(file.type) && !/\.(pdf|docx?)$/i.test(file.name)) return { error: t.errors.cvType };
-    const newKey = await putCv(user.id, file);
+    let newKey: string;
+    try {
+      newKey = await putCv(user.id, file);
+    } catch (err) {
+      console.error('[profile] CV upload failed', err);
+      return { error: t.errors.cvUploadFailed };
+    }
     if (cvKey) await deleteCv(cvKey).catch(() => {});
     cvKey = newKey; cvOriginalName = file.name.slice(0, 200);
   }
@@ -114,6 +121,14 @@ export async function setApplicationStatus(id: number, status: 'applied' | 'inte
 export async function deleteAccount() {
   const user = await getCurrentUser();
   if (!user) redirect('/login');
+  // Do not remove the local customer mapping while a subscription can still bill.
+  if (user.stripeSubscriptionId) {
+    if (!stripe) throw new Error((await getT()).profile.cancelFirst);
+    const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+    const customer = typeof subscription.customer === 'string' ? subscription.customer : subscription.customer.id;
+    if (customer !== user.stripeCustomerId) throw new Error('Subscription ownership mismatch.');
+    if (!['canceled', 'incomplete_expired'].includes(subscription.status)) await stripe.subscriptions.cancel(subscription.id);
+  }
   const [profile] = await db.select().from(profiles).where(eq(profiles.userId, user.id));
   if (profile?.cvKey) await deleteCv(profile.cvKey).catch(() => {});
   await destroySession();

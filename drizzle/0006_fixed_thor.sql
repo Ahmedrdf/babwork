@@ -1,0 +1,1 @@
+ALTER TABLE "jobs" ADD COLUMN "moderation_blocked" boolean DEFAULT false NOT NULL;

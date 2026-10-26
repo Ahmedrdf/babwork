@@ -15,6 +15,41 @@
       "when": 1791147415677,
       "tag": "0001_job_views",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791233031026,
+      "tag": "0002_cv_files",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793028833391,
+      "tag": "0003_konnect_payments",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793028926247,
+      "tag": "0004_konnect_checkout_lock",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793033946438,
+      "tag": "0005_yummy_unus",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793034203346,
+      "tag": "0006_fixed_thor",
+      "breakpoints": true
     }
   ]
 }

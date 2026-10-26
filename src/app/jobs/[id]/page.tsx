@@ -15,6 +15,7 @@ import { getLocale } from '@/i18n/server';
 import { messages } from '@/i18n/messages';
 import { INTL } from '@/i18n/config';
 import { ApplyBox } from './ApplyBox';
+import { JobReport } from '@/components/Community';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -124,6 +125,7 @@ export default async function JobPage({ params }: Props) {
           {user
             ? <form action={toggle} className="save"><button className="linkish">{saved ? t.job.unsave : t.job.save}</button></form>
             : <p className="save"><Link href={`/login?next=/jobs/${id}`}>{t.job.signInToSave}</Link></p>}
+          <JobReport jobId={id} signedIn={!!user} />
         </aside>
       </div>
 

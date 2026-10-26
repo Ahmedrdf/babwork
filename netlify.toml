@@ -5,6 +5,6 @@
 [functions]
   node_bundler = "esbuild"
 
-# Allow the import endpoint enough time to fetch four feeds (Netlify functions default to 10s on free tier; background-safe path below)
+# The scheduled import does not run here (functions stop after 10 s on the free tier): see .github/workflows/ingest.yml
 [functions."___netlify-server-handler"]
   included_files = ["drizzle/**"]

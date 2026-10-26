@@ -37,6 +37,7 @@ export function RegisterForm({ next }: { next?: string }) {
         {next && <input type="hidden" name="next" value={next} />}
         <label>{a.email} <input type="email" name="email" dir="ltr" required autoComplete="email" /></label>
         <label>{a.password} <input type="password" name="password" minLength={8} required autoComplete="new-password" /><small>{a.passwordHint}</small></label>
+        <label>{a.confirmPassword} <input type="password" name="confirmPassword" minLength={8} required autoComplete="new-password" /></label>
         <SubmitButton pendingText={a.creating}>{a.createButton}</SubmitButton>
       </form>
       <p className="quiet">{a.agree[0]}<Link href="/terms">{a.agree[1]}</Link>{a.agree[2]}<Link href="/privacy">{a.agree[3]}</Link>{a.agree[4]}</p>

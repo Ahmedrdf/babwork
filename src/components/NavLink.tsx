@@ -2,7 +2,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-export function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
+export function NavLink({ href, children, className = '' }: { href: string; children: React.ReactNode; className?: string }) {
   const path = usePathname();
-  return <Link href={href} className={path.startsWith(href) ? 'on' : ''}>{children}</Link>;
+  const active = path.startsWith(href);
+  return <Link href={href} className={`${className} ${active ? 'on' : ''}`.trim()} aria-current={active ? 'page' : undefined}>{children}</Link>;
 }

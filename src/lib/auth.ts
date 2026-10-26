@@ -5,6 +5,7 @@ import { randomBytes, createHash } from 'crypto';
 import bcrypt from 'bcryptjs';
 import { eq, and, gt } from 'drizzle-orm';
 import { db, users, sessions, profiles, tokens, type User } from '@/db';
+import { env } from '@/lib/env';
 
 const COOKIE = 'rp_session';
 const SESSION_DAYS = 30;
@@ -33,8 +34,9 @@ export async function destroySession() {
 
 export type CurrentUser = User & { isPro: boolean };
 
-export function isPro(u: Pick<User, 'plan' | 'subscriptionEndsAt'>) {
+export function isPro(u: Pick<User, 'plan' | 'subscriptionEndsAt'> & Partial<Pick<User, 'premiumSource'>>) {
   if (u.plan !== 'pro') return false;
+  if (env.isProd && u.premiumSource === 'konnect:sandbox') return false;
   return !u.subscriptionEndsAt || u.subscriptionEndsAt > new Date();
 }
 

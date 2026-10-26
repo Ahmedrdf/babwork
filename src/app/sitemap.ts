@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import { desc, eq } from 'drizzle-orm';
 import { db, jobs } from '@/db';
 import { topCategories } from '@/lib/jobs';
+import { env } from '@/lib/env';
 
 // Built on each request: job listings change every few hours.
 export const dynamic = 'force-dynamic';
@@ -15,6 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     { url: `${base}/`, changeFrequency: 'hourly', priority: 1 },
     { url: `${base}/jobs`, changeFrequency: 'hourly', priority: 0.9 },
+    ...['about', 'contact', ...(env.pricingVisible ? ['subscribe'] : [])].map(path => ({ url: `${base}/${path}`, changeFrequency: 'monthly' as const, priority: 0.5 })),
     ...categories.map((c) => ({ url: `${base}/jobs?category=${encodeURIComponent(c.category)}`, changeFrequency: 'daily' as const, priority: 0.7 })),
     ...rows.map((r) => ({ url: `${base}/jobs/${r.id}`, lastModified: r.fetchedAt, changeFrequency: 'daily' as const, priority: 0.6 })),
   ];
