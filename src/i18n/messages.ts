@@ -128,6 +128,7 @@ const en = {
   },
   profile: {
     title: 'Your profile', welcome: 'Account created. Fill in your profile so applications are one click.', missing: 'Add your name and CV first, then apply.',
+    verificationPending: 'Your account is ready, but the confirmation email could not be sent. You can use the site and try “Resend email” later. Your email remains unverified.',
     intro: 'Everything here is reused when you apply, so you only fill it in once.',
     fullName: 'Full name', headline: 'Headline', headlinePh: 'Customer support specialist, 5 years', location: 'Location', locationPh: 'Lisbon, Portugal (UTC+0)',
     phone: 'Phone', linkedin: 'LinkedIn', portfolio: 'Portfolio / GitHub', summary: 'Summary', coverNote: 'Default cover note', coverPh: 'You can edit it for each application.',
@@ -156,6 +157,7 @@ const en = {
     resetInvalid: 'This reset link is invalid or has expired. Request a new one.',
     verifyRecent: 'A confirmation email was already sent recently.',
     verifySent: 'Confirmation email sent.',
+    verifyUnavailable: 'The confirmation email could not be sent. Please try again later.',
     cvSize: 'Your CV must be under 4 MB.',
     cvUploadFailed: 'We couldn’t save your CV. Try again, or try a smaller file.',
     cvType: 'Your CV must be a PDF or Word file.',
@@ -327,6 +329,7 @@ const fr: Messages = {
   },
   profile: {
     title: 'Votre profil', welcome: 'Compte créé. Remplissez votre profil pour postuler en un clic.', missing: 'Ajoutez d’abord votre nom et votre CV, puis postulez.',
+    verificationPending: 'Votre compte est prêt, mais l’email de confirmation n’a pas pu être envoyé. Vous pouvez utiliser le site et réessayer « Renvoyer l’email » plus tard. Votre adresse reste non vérifiée.',
     intro: 'Tout ce qui est ici est réutilisé quand vous postulez : vous ne le remplissez qu’une fois.',
     fullName: 'Nom complet', headline: 'Titre', headlinePh: 'Chargée de support client, 5 ans', location: 'Lieu', locationPh: 'Lyon, France (UTC+1)',
     phone: 'Téléphone', linkedin: 'LinkedIn', portfolio: 'Portfolio / GitHub', summary: 'Présentation', coverNote: 'Message de candidature par défaut', coverPh: 'Vous pourrez le modifier à chaque candidature.',
@@ -355,6 +358,7 @@ const fr: Messages = {
     resetInvalid: 'Ce lien de réinitialisation est invalide ou a expiré. Demandez-en un nouveau.',
     verifyRecent: 'Un email de confirmation a déjà été envoyé récemment.',
     verifySent: 'Email de confirmation envoyé.',
+    verifyUnavailable: 'L’email de confirmation n’a pas pu être envoyé. Réessayez plus tard.',
     cvSize: 'Votre CV doit faire moins de 4 Mo.',
     cvUploadFailed: 'Impossible d’enregistrer votre CV. Réessayez, ou essayez un fichier plus léger.',
     cvType: 'Votre CV doit être un fichier PDF ou Word.',
@@ -524,6 +528,7 @@ const ar: Messages = {
   },
   profile: {
     title: 'ملفك الشخصي', welcome: 'تم إنشاء الحساب. املأ ملفك ليصبح التقديم بنقرة واحدة.', missing: 'أضف اسمك وسيرتك الذاتية أولاً، ثم تقدّم.',
+    verificationPending: 'حسابك جاهز، لكن تعذر إرسال رسالة التأكيد. يمكنك استخدام الموقع وإعادة محاولة الإرسال لاحقًا. يبقى بريدك غير مؤكد.',
     intro: 'كل ما هنا يُعاد استخدامه عند التقديم، فتملؤه مرة واحدة فقط.',
     fullName: 'الاسم الكامل', headline: 'المسمّى المهني', headlinePh: 'أخصائي دعم العملاء، 5 سنوات', location: 'المكان', locationPh: 'دبي، الإمارات (UTC+4)',
     phone: 'الهاتف', linkedin: 'LinkedIn', portfolio: 'معرض الأعمال / GitHub', summary: 'نبذة عنك', coverNote: 'رسالة التقديم الافتراضية', coverPh: 'يمكنك تعديلها في كل طلب.',
@@ -552,6 +557,7 @@ const ar: Messages = {
     resetInvalid: 'رابط إعادة التعيين هذا غير صالح أو منتهي الصلاحية. اطلب رابطاً جديداً.',
     verifyRecent: 'تم إرسال رسالة التأكيد مؤخراً.',
     verifySent: 'تم إرسال رسالة التأكيد.',
+    verifyUnavailable: 'تعذر إرسال رسالة التأكيد. حاول مجددًا لاحقًا.',
     cvSize: 'يجب أن يكون حجم السيرة الذاتية أقل من 4 ميغابايت.',
     cvUploadFailed: 'تعذّر حفظ سيرتك الذاتية. حاول مجدداً، أو جرّب ملفاً أصغر.',
     cvType: 'يجب أن تكون السيرة الذاتية بصيغة PDF أو Word.',

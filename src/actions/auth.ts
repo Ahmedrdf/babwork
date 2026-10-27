@@ -30,11 +30,24 @@ export async function register(_: FormState, form: FormData): Promise<FormState>
   if (exists) return { error: t.errors.emailExists };
 
   const user = await createUser(email, password);
-  const token = await issueToken(user.id, 'verify_email');
-  await sendMail({ to: email, subject: t.mail.verifySubject, text: t.mail.verifyText(`${env.APP_URL}/verify?token=${token}`) });
+  let verificationPending = !env.mailEnabled;
+  if (env.mailEnabled) {
+    const token = await issueToken(user.id, 'verify_email');
+    try {
+      await sendMail({ to: email, subject: t.mail.verifySubject, text: t.mail.verifyText(`${env.APP_URL}/verify?token=${token}`) });
+    } catch {
+      // The account already exists. A delivery outage must not strand it without a session.
+      // Email verification remains required for sensitive email-based actions.
+      verificationPending = true;
+      console.error('[register] Verification delivery failed; account created with email still unverified.');
+    }
+  }
   await createSession(user.id);
   const next = safeNext(form.get('next'), '');
-  redirect(next ? `/profile?welcome=1&next=${encodeURIComponent(next)}` : '/profile?welcome=1');
+  const params = new URLSearchParams({ welcome: '1' });
+  if (next) params.set('next', next);
+  if (verificationPending) params.set('verification', 'pending');
+  redirect(`/profile?${params}`);
 }
 
 export async function login(_: FormState, form: FormData): Promise<FormState> {
@@ -87,8 +100,14 @@ export async function resendVerification(): Promise<FormState> {
   const user = await getCurrentUser();
   if (!user || user.emailVerifiedAt) return undefined;
   const t = await getT();
-  if (!(await rateLimit(`verify:${user.id}`, 3, 3600))) return { error: t.errors.verifyRecent };
+  if (!env.mailEnabled) return { error: t.errors.verifyUnavailable };
+  if (!(await rateLimit(`verify:${user.id}`, 3, 3600))) return { error: t.errors.tooManyRequests };
   const token = await issueToken(user.id, 'verify_email');
-  await sendMail({ to: user.email, subject: t.mail.verifySubject, text: t.mail.verifyText(`${env.APP_URL}/verify?token=${token}`) });
+  try {
+    await sendMail({ to: user.email, subject: t.mail.verifySubject, text: t.mail.verifyText(`${env.APP_URL}/verify?token=${token}`) });
+  } catch {
+    console.error('[verify] Confirmation delivery failed.');
+    return { error: t.errors.verifyUnavailable };
+  }
   return { ok: t.errors.verifySent };
 }
