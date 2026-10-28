@@ -1,0 +1,7 @@
+FICHIER RETIRÉ DU PROJET
+
+src/app/recommendations/advice.worker.ts
+
+S’il existe dans votre dossier initial, vous pouvez le supprimer : il appartenait
+au classement IA Qwen retiré. Les nouveaux fichiers ne l’importent plus.
+Ne pas supprimer matching.worker.ts : il reste utilisé pour comparer le CV aux offres.

@@ -1,0 +1,27 @@
+BABWORK — DERNIERS CHANGEMENTS UNIQUEMENT
+
+Ce ZIP contient uniquement les fichiers source modifiés ou ajoutés pour les dernières
+retouches, avec leurs chemins src/, tests/ et README.md.
+Il ne contient ni node_modules, ni .next, ni .env, ni base de données, ni modèle IA téléchargé.
+
+CHANGEMENTS INCLUS
+- Aperçu du CV à droite après un import de fichier réussi uniquement.
+- Panneau vide masqué avant l’import ; formulaire seul tant qu’aucun fichier n’a été importé.
+- PDF original avec navigation entre pages ; DOCX/TXT avec aperçu texte.
+- Stabilisation du panneau PDF pour éviter les mouvements répétés de l’écran.
+- Aperçu sous le formulaire sur mobile.
+- Suppression du classement IA facultatif Qwen et de son téléchargement.
+- Conservation des conseils immédiats et de leur copie.
+
+COPIE DANS LE DOSSIER INITIAL
+1. Décompresser le ZIP dans un dossier temporaire.
+2. Copier les dossiers src/ et tests/ ainsi que README.md dans le dossier du projet
+   qui contient package.json. Accepter le remplacement des fichiers existants.
+3. Consulter SUPPRESSIONS.txt : l’ancien worker Qwen peut être supprimé s’il existe.
+4. Relancer le serveur de développement puis actualiser le navigateur (Ctrl+F5).
+
+Garder les fichiers .env, la base locale, package.json, package-lock.json et node_modules
+déjà présents dans le dossier initial. Aucune nouvelle dépendance ni migration SQL.
+Les dépendances existantes doivent déjà être installées pour exécuter le projet.
+
+Pour Netlify : publier les fichiers mis à jour via le dépôt GitHub habituel.

@@ -8,6 +8,8 @@ import type { Match, MatchingJob } from '@/lib/cv-matching';
 import { improvements } from '@/i18n/improvements';
 import { MatchFeedback } from '@/components/Community';
 import { CvJourney } from '@/components/CvJourney';
+import { CvAdvisor } from './CvAdvisor';
+import { CvPreview } from './CvPreview';
 
 type Result = Match & { job: MatchingJob };
 type WorkerReply = { status: 'loadingModel' | 'ranking' | 'complete' | 'error'; done?: number; total?: number; matches?: Match[]; file?: string; loaded?: number; bytes?: number };
@@ -20,6 +22,7 @@ export function Matcher({ savedCvName, trial = false, showPricing = false }: { s
   const worker = useRef<Worker | null>(null);
   const abort = useRef<AbortController | null>(null);
   const [cv, setCv] = useState('');
+  const [previewFile, setPreviewFile] = useState<File | null>(null);
   const [region, setRegion] = useState('');
   const [stage, setStage] = useState<'' | 'reading' | 'loadingModel' | 'ranking'>('');
   const [error, setError] = useState('');
@@ -35,7 +38,11 @@ export function Matcher({ savedCvName, trial = false, showPricing = false }: { s
 
   async function read(file: File) {
     setStage('reading'); setError(''); setResults(null);
-    try { const { readCv } = await import('@/lib/read-cv'); setCv(await readCv(file)); }
+    try {
+      const { readCv } = await import('@/lib/read-cv');
+      const text = await readCv(file);
+      setCv(text); setPreviewFile(file);
+    }
     catch (error) {
       const code = error instanceof Error ? error.message : '';
       setError(code === 'invalidFile' ? t.invalidFile : code === 'noText' ? t.noText : t.cvError);
@@ -76,6 +83,7 @@ export function Matcher({ savedCvName, trial = false, showPricing = false }: { s
         const data = event.data;
         if (data.status === 'error') { setError(t.modelError); setStage(''); return; }
         if (data.status === 'complete') {
+          worker.current?.terminate(); worker.current = null;
           const byId = new Map(jobs.map(job => [job.id, job]));
           const matches = (data.matches || []).filter(m => byId.has(m.id)).map(m => ({ ...m, job: byId.get(m.id)! }));
           if (permit) { completion.current = { permit, results: matches, total: jobs.length }; setPendingCompletion(true); void acknowledge(); return; }
@@ -112,6 +120,7 @@ export function Matcher({ savedCvName, trial = false, showPricing = false }: { s
   return <>
     <div className="matching-notice"><p>{t.privacy}</p><p className="hint">{t.download}</p></div>
     <CvJourney locale={locale} stage={stage} ready={cv.trim().length >= 40} complete={results !== null} />
+    <div className={`matching-workspace${previewFile ? ' has-preview' : ''}`}>
     <form className="matching-form plan-card" onSubmit={match}>
       <label>{t.upload}<input type="file" accept=".pdf,.docx,.txt" disabled={busy || trialUsed || pendingCompletion} onChange={event => {
         const file = event.currentTarget.files?.[0]; if (file) void read(file); event.currentTarget.value = '';
@@ -133,9 +142,12 @@ export function Matcher({ savedCvName, trial = false, showPricing = false }: { s
         {stage === 'ranking' && progress.total > 0 && <progress max={progress.total} value={progress.done} aria-label={t.ranking} />}</div>}
       {error && <p className="err" role="alert">{error}</p>}
     </form>
+    {previewFile && <CvPreview file={previewFile} text={cv} />}
+    </div>
     {results !== null && <section className="matching-results" aria-live="polite">
       <h2>{t.results}</h2><p className="quiet">{t.count} {progress.total}</p><p className="hint">{t.disclaimer}</p>
       {!results.length && <p className="empty">{t.noMatches}</p>}
+      {results.length > 0 && <CvAdvisor key={locale} cv={cv} jobs={results.map(result => result.job)} />}
       <ol className="match-list">{results.map(({ job, shared, check }, index) => <li className="plan-card match-card" key={job.id} style={{ animationDelay: `${Math.min(index, 6) * 65}ms` }}>
         <h3><Link href={`/jobs/${job.id}`}>{job.title}</Link></h3><p className="quiet">{job.company} · {job.location}</p>
         {job.salary && <p>{job.salary}</p>}

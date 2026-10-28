@@ -118,6 +118,22 @@ Deleting an account cancels its associated subscription before deleting the loca
 Test with card `4242 4242 4242 4242` (any future date, any CVC). `4000 0025 0000 3155` triggers 3-D Secure.
 
 ### Premium CV matching
+
+After a successful file import, the matching form displays the CV in a panel on its right
+(below the form on mobile). The panel is hidden before importing a file. PDFs are rendered locally with PDF.js, with page navigation and a stable-height
+scrollable canvas. DOCX, TXT and pasted content use a plain-text preview. The original
+PDF stays visible while the extracted text in the form can be edited for matching.
+No document upload, embedded frame or external viewer is used for this preview.
+Reserved scrollbar space and retained canvas layout prevent resize feedback while loading.
+
+After matching, the recommendations page includes an **Improve my CV** panel.
+The user chooses a matched job and receives three predefined suggestions personalized
+with CV/job keyword matches and the job title, in French, English or Arabic.
+Suggestions and copying work entirely in the browser, without an additional model or API.
+Keyword checks can miss synonyms; an unmentioned skill is not necessarily absent.
+The optional Qwen priority ranking has been removed. The original multilingual model
+used for CV-to-job matching remains unchanged.
+
 For local testing without payment, set `CV_MATCHING_PREVIEW=1` in `.env`, restart `npm run dev`,
 sign in, and open `/recommendations`. A test banner is displayed. This does not change the user's
 plan or create a Stripe subscription, and checkout is blocked while preview mode is active.
@@ -288,3 +304,5 @@ Signed-in users can report a job and give useful/not-relevant feedback on a reco
 Apply the additive migrations before starting the updated application: `npm run db:migrate`. Stop the development server first when using PGlite. Run `npm test` for billing, trial, permissions and moderation regression checks. Integration tests use isolated, in-memory databases and never send emails or charge payments.
 
 Remaining external launch setup: a verified sending domain for emails beyond Resend's test-recipient restriction, merchant validation and production Konnect credentials, publisher details when the owner is ready, and testing on real mobile devices. These are not enabled by the code changes.
+
+
